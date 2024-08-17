@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Billing {
+  id     String @id
+  period String
+  stage  String
+  amount Int
+
+  payments Payment[]
+
+  @@map("billings")
+}
+
+model Stage {
+  id            String @id
+  name          String @unique
+  billingAmount Int    @map("billing_amount")
+
+  payers Payer[]
+
+  @@map("stages")
+}
+
+model Payment {
+  id      String        @id
+  amount  Int
+  credits Int           @default(0)
+  period  String
+  status  PaymentStatus @default(UNPAID)
+
+  // imgUrl    String
+  payerId   String @map("payer_id")
+  billingId String @map("billing_id")
+
+  billing Billing @relation(fields: [billingId], references: [id])
+  payer   Payer   @relation(fields: [payerId], references: [id])
+
+  @@map("payments")
+}
+
+model Payer {
+  id             String      @id
+  name           String      @unique
+  whatsappChatId String      @unique @map("whatsapp_chat_id")
+  contact        String      @unique
+  status         PayerStatus @default(ACTIVE)
+  stageId        String      @map("stage_id")
+
+  payments Payment[]
+  stage    Stage     @relation(fields: [stageId], references: [name])
+
+  @@map("payers")
+}
+
+enum PaymentStatus {
+  PAID
+  PARTIAL
+  UNPAID
+}
+
+enum PayerStatus {
+  ACTIVE
+  UNACTIVE
+}
