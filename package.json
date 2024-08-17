@@ -1,0 +1,30 @@
+{
+  "name": "payment-voucher-bot",
+  "version": "1.0.0",
+  "description": "Aplicação projetada para automatizar o processo de controle de pagamentos de mensalidades através do WhatsApp.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/guirra-byte/payment-voucher-bot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/guirra-byte/payment-voucher-bot/issues"
+  },
+  "homepage": "https://github.com/guirra-byte/payment-voucher-bot#readme",
+  "dependencies": {
+    "@prisma/client": "^5.17.0",
+    "nanoid": "^3.3.6",
+    "node-cron": "^3.0.3",
+    "qrcode-terminal": "^0.12.0",
+    "replicate": "^0.32.0",
+    "whatsapp-web.js": "^1.25.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.17.0"
+  }
+}
