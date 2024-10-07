@@ -6,9 +6,9 @@ const { formatDate } = require("../../helpers/format-date");
 
 (async () => {
   const stages = [
-    { name: "RECRUITS", amount: 80 },
-    { name: "INTERNS", amount: 60 },
-    { name: "SHAPERS", amount: 40 },
+    { name: "RECRUIT", amount: 80 },
+    { name: "INTERN", amount: 60 },
+    { name: "SHAPER", amount: 40 },
   ];
 
   const period = formatDate(new Date());
