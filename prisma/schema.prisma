@@ -59,6 +59,21 @@ model Payer {
   @@map("payers")
 }
 
+model OpenAiCredentials {
+  id     Int     @id @default(autoincrement())
+  apiKey String  @unique @map("api_key")
+  inUse  Boolean @default(false) @map("in_use")
+  tagUse TagUse
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt
+}
+
+enum TagUse {
+  TRANSCRIPTION
+  FINE_TUNE
+}
+
 enum PaymentStatus {
   PAID
   PARTIAL
