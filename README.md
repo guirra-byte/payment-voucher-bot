@@ -1,12 +1,17 @@
 ## Descrição
 Este bot facilita o **`controle e a gestão de pagamentos de mensalidade através do WhatsApp`**.
 
+![image (10)](https://github.com/user-attachments/assets/3cca2c7d-0028-460e-b81b-419f1f8dea88)
+
+## Features:
 ### Upload de Comprovantes: 
 Usuários enviam comprovantes de pagamento diretamente pelo WhatsApp.
 ### Verificação Automatizada: 
 O bot analisa os comprovantes e confirma se o pagamento foi realizado corretamente.
 ### Notificações: 
 Envia confirmações de pagamento e lembretes para os usuários sobre pendências de mensalidades.
+## 
+![image (11)](https://github.com/user-attachments/assets/0ad32aee-da29-4dc5-ba1d-0711cc5a6b38)
 
 ## Tecnologias Utilizadas:
 
