@@ -12,7 +12,7 @@ Envia confirmações de pagamento e lembretes para os usuários sobre pendência
 
 **`Node.js:`** Base do servidor, utilizado para construir a lógica do bot. <br>
 **`whatsapp-web.js:`** Biblioteca para realizar a integração com o WhatsApp, permitindo a interação com os usuários. <br>
-**`Tesseract.js:`** Biblioteca utilizada para realizar a extração das informações **(OCR)** dos comprovantes enviados pelos usuários.
+**`Tesseract.js:`** Biblioteca utilizada para realizar a extração das informações **(OCR)** dos comprovantes enviados pelos usuários. <br>
 **`Prisma:`** ORM utilizado para gerenciar e acessar o banco de dados, armazenando informações sobre os pagamentos. <br>
 **`JavaScript:`** Linguagem utilizada para desenvolver o bot.
 
