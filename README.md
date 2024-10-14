@@ -1,5 +1,8 @@
 ## Caso de Uso
-**`Status do projeto`**: **Em Desenvolvimento** 🚧 <br>
+> [!CAUTION]
+> Isto é uma **solução temporária**. <br>
+> **`Status do projeto`**: **Em Desenvolvimento** 🚧 <br>
+
 Este projeto foi criado para automatizar o **processo de cobrança e verificação de pagamentos de mensalidades através de um chatbot no WhatsApp**. Antes, a cobrança era realizada por meio de listas de transmissão, e os comprovantes de pagamento eram verificados manualmente, um por um. O sistema desenvolvido simplifica e automatiza essa tarefa, permitindo a automatização na verificação dos comprovantes de pagamento dos alunos, garantindo mais eficiência na gestão de pagamentos e controle de mensalidades.
 
 ## Descrição
@@ -23,7 +26,8 @@ Envia confirmações de pagamento e lembretes para os usuários sobre pendência
 **`whatsapp-web.js:`** Biblioteca para realizar a integração com o WhatsApp, permitindo a interação com os usuários. <br>
 **`Tesseract.js:`** Biblioteca utilizada para realizar a extração das informações **(OCR)** dos comprovantes enviados pelos usuários. <br>
 **`Prisma:`** ORM utilizado para gerenciar e acessar o banco de dados, armazenando informações sobre os pagamentos. <br>
-**`JavaScript:`** Linguagem utilizada para desenvolver o bot.
+**`JavaScript:`** Linguagem utilizada para desenvolver o bot. <br>
+**`Vue.Js e Nuxt:`** Tecnologias utilizadas para contrução do frontend.
 
 <br>
 
