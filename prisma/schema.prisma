@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Billing {
-  id     String @id
+  id     Int    @id @default(autoincrement())
   period String
   stage  String
   amount Int
@@ -37,7 +37,7 @@ model Payment {
 
   // imgUrl    String
   payerId   String @map("payer_id")
-  billingId String @map("billing_id")
+  billingId Int    @map("billing_id")
 
   billing Billing @relation(fields: [billingId], references: [id])
   payer   Payer   @relation(fields: [payerId], references: [id])

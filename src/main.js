@@ -4,7 +4,7 @@ const { client: prismaClient } = require("./shared/prisma/index.prisma");
 const { nanoid } = require("nanoid");
 const path = require("node:path");
 const { Worker } = require("node:worker_threads");
-
+const fs = require("node:fs");
 
 /* TODO: Implementar lógica de Workers Pool -> controlar o número de instâncias globais */
 const client = new Client({
@@ -19,10 +19,19 @@ client.on("qr", (qr) => {
   qrcode.generate(qr, { small: true });
 });
 
+const getPayer = async (chatId, contact) => {
+  return await prismaClient.payers.findUnique({
+    where: {
+      whatsappChatId: chatId,
+      contact,
+    },
+  });
+};
+
 client.on("message", async (msg) => {
   const chat = await msg.getChat();
   const commandPattern =
-    /!nome\s+([a-zA-Z\s]+)\s+!estagio\s+(Recruit|Intern|Shaper)/i;
+    /!name\s+([a-zA-Z\s]+)\s+!stage\s+(Recruit|Intern|Shaper)/i;
 
   let paymentOwner = {};
   const match = msg.body.match(commandPattern);
@@ -34,43 +43,65 @@ client.on("message", async (msg) => {
     if (!getContactName) {
       paymentOwner.name = name;
       paymentOwner.stage = stage;
+      paymentOwner.numberPhone = await (
+        await chat.getContact()
+      ).getFormattedNumber();
     }
   }
 
-  if (paymentOwner === "") {
+  if (paymentOwner.name === "" && paymentOwner.stage === "") {
     client.sendMessage(chat.id, {
-      body: `Envie seu nome completo seguido do comando !nome e
-      seu estágio no curso Lifeshapers seguido do
-      comando !estagio. Ex: *!nome* Matheus Guirra Sousa *!estagio* Intern`,
+      body: `Envie o comando !name seguido do seu nome completo e o comando !stage
+      seguido do seu estágio no curso Lifeshapers.
+      Ex: *!name* Matheus Guirra Sousa *!stage* Intern`,
     });
   }
 
-  if (msg.hasMedia && paymentOwner.name !== "") {
-    const getPayer = async (chatId, contact) => {
-      return await prismaClient.payers.findUnique({
-        where: {
-          whatsappChatId: chatId,
-          contact,
-        },
-      });
+  if (msg.hasMedia && paymentOwner.name !== "" && paymentOwner.stage !== "") {
+    const noteContact = async () => {
+      const notedContact = await getPayer(chat.id, paymentOwner);
+      if (notedContact) {
+        const media = await msg.downloadMedia();
+
+        if (media.mimetype === "image/jpeg" || media.mimetype === "image/png") {
+          const ocrWorkerPath = path.resolve("./extract-media-text.js");
+          const ocrWorker = new Worker(ocrWorkerPath);
+
+          ocrWorker.postMessage(
+            JSON.stringify({
+              chatId: chat.id,
+              contact: paymentOwner,
+              img: media.data,
+              mimetype: media.mimetype,
+            })
+          );
+        } else if (media.mimetype === "application/pdf") {
+        }
+      } else if (!notedContact) {
+        const contact = await (await chat.getContact()).getFormattedNumber();
+        const stage = await prismaClient.stages.findUnique({
+          where: { name: paymentOwner.stage },
+        });
+
+        if (stage) {
+          await prismaClient.payers.create({
+            data: {
+              name: paymentOwner.name,
+              stageId: stage.id,
+              whatsappChatId: chat.id,
+              status: "ACTIVE",
+              contact: contact,
+            },
+          });
+
+          await noteContact();
+        } else {
+          throw new Error("Cannot find stage!");
+        }
+      }
     };
 
-    const notedContact = await getPayer(chat.id, paymentOwner);
-    if (notedContact) {
-      const downloadMediaWorkerPath = path.resolve("./download-task.js");
-
-      const downloadMediaWorker = new Worker(downloadMediaWorkerPath);
-      downloadMediaWorker.postMessage(JSON.stringify(msg));
-    } else if (!notedContact) {
-      client.client.sendMessage(chat.id, {
-        body: "Envie em qual estágio do Programa Lifeshaper você faz parte seguido do comando !estagio. Ex: !estagio Recruit",
-      });
-    }
-  }
-});
-
-client.on("message", async (msg) => {
-  if (msg.body === "!nome") {
+    await noteContact();
   }
 });
 

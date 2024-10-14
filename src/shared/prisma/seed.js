@@ -6,13 +6,21 @@ const { formatDate } = require("../../helpers/format-date");
 
 (async () => {
   const stages = [
-    { name: "RECRUITS", amount: 80 },
-    { name: "INTERNS", amount: 60 },
-    { name: "SHAPERS", amount: 40 },
+    { name: "RECRUIT", amount: 80 },
+    { name: "INTERN", amount: 60 },
+    { name: "SHAPER", amount: 40 },
   ];
 
   const period = formatDate(new Date());
   if (period) {
+    const [month, year] = period.split("/");
+    if (month === "set") {
+      // Update all Lifeshapers stage in course;
+      // Remember, the last class (Shapers) get out in application (Remove all in database);
+      // Send message to require unpaid billings.
+      growStage();
+    }
+
     for (let stage of stages) {
       const stageAlreadyNoted = await client.stage.findUnique({
         where: {
