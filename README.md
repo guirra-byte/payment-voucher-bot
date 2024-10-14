@@ -1,3 +1,7 @@
+## Caso de Uso
+**`Status do projeto`**: **Em Desenvolvimento** 🚧 <br>
+Este projeto foi criado para automatizar o **processo de cobrança e verificação de pagamentos de mensalidades através de um chatbot no WhatsApp**. Antes, a cobrança era realizada por meio de listas de transmissão, e os comprovantes de pagamento eram verificados manualmente, um por um. O sistema desenvolvido simplifica e automatiza essa tarefa, permitindo a automatização na verificação dos comprovantes de pagamento dos alunos, garantindo mais eficiência na gestão de pagamentos e controle de mensalidades.
+
 ## Descrição
 Este bot facilita o **`controle e a gestão de pagamentos de mensalidade através do WhatsApp`**.
 
@@ -24,6 +28,7 @@ Envia confirmações de pagamento e lembretes para os usuários sobre pendência
 <br>
 
 > [!NOTE]
-> Este bot oferece uma solução prática e eficiente para <br> **`gerenciar
-> pagamentos de forma simples e direta`**, utilizando o
-> WhatsApp <br> como principal canal de comunicação.
+> Uma futura feature do sistema será a **integração direta com a API de um banco**,
+> permitindo a **geração automática de chaves e QR Codes para pagamento via Pix**.
+> Além disso, o sistema receberá **confirmações de pagamento em tempo real através de webhooks**,
+> otimizando ainda mais o processo de cobrança e recebimento.
