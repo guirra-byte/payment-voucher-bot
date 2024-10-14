@@ -14,7 +14,7 @@ const dateRegexes = [
   /\b(\d{4}-\d{2}-\d{2})\b/, // yyyy-mm-dd
   /\b(\d{2}-\d{2}-\d{4})\b/, // dd-mm-yyyy
   /\b(\d{2}\.\d{2}\.\d{4})\b/, // dd.mm.yyyy
-  /\b(\d{2} [a-z]{3} \d{4})\b/i, // 05 ago 2024 -> Nubank
+  /\b(\d{2} [a-z]{3} \d{4})\b/i // 05 ago 2024 -> Nubank
 ];
 
 async function recognize(imageUrl) {
@@ -73,12 +73,16 @@ if (parentPort) {
         if (destine && amount && period) {
           const payer = await client.payer.findUnique({
             where: { name: data.contact },
-            include: { payment: true, stage: true },
+            include: { payment: true, stage: true }
           });
 
           if (payer) {
             let remainderToPaid = {};
-            const stage = payer.stage;
+            const stage = await client.stages.findUnique({
+              where: {
+                id: payer.stageId
+              }
+            });
 
             if (stage) {
               let paymentStatus = "";
@@ -96,14 +100,14 @@ if (parentPort) {
                   remainderToPaid = {
                     period,
                     credits: partialPayment + lastPayment.credits,
-                    status: paymentStatus,
+                    status: paymentStatus
                   };
                 } else if (stage.billingAmount === amount) {
                   paymentStatus = "PAID";
                   remainderToPaid = {
                     period,
                     credits: 0,
-                    status: paymentStatus,
+                    status: paymentStatus
                   };
                 }
 
@@ -118,7 +122,7 @@ if (parentPort) {
                       notedCredits / stage.billingAmount;
 
                     const billings = await client.billings.findMany({
-                      where: { stage: stage },
+                      where: { stage: stage }
                     });
 
                     const periodBilling = billings.find(
@@ -144,12 +148,12 @@ if (parentPort) {
                     await client.payments.updateMany({
                       where: {
                         payer_id: payer.id,
-                        billingId: { in: { paidByCredits } },
+                        billingId: { in: { paidByCredits } }
                       },
                       data: {
                         status: "PAID",
-                        credits: 0,
-                      },
+                        credits: 0
+                      }
                     });
                   }
 
@@ -164,7 +168,7 @@ if (parentPort) {
                   remainderToPaid = {
                     period,
                     credits: totalCredits,
-                    status: paymentStatus,
+                    status: paymentStatus
                   };
                 }
               }
@@ -176,14 +180,14 @@ if (parentPort) {
                   status: remainderToPaid.status,
                   amount,
                   credits: remainderToPaid.credits,
-                  stage: payer.stageId,
+                  stage: payer.stageId
                 }
               );
 
               const billing = await client.billings.findUnique({
                 where: {
-                  period,
-                },
+                  period
+                }
               });
 
               let billingId = "";
@@ -193,8 +197,8 @@ if (parentPort) {
                   data: {
                     id,
                     period,
-                    classStage,
-                  },
+                    classStage
+                  }
                 });
 
                 billingId = !billing ? id : billing.id;
@@ -208,8 +212,8 @@ if (parentPort) {
                   billingId,
                   status: payment.status(),
                   credits: payment.credits(),
-                  whatsappChatId: data.chatId,
-                },
+                  whatsappChatId: data.chatId
+                }
               });
             }
           } else {
@@ -217,7 +221,7 @@ if (parentPort) {
           }
 
           const currentStage = await client.stages.findUnique({
-            where: { name: data.contact.stage },
+            where: { name: data.contact.stage }
           });
 
           if (currentStage) {
@@ -225,7 +229,7 @@ if (parentPort) {
               name: data.contact.name,
               contact: data.contact.numberPhone,
               whatsappChatId: data.chatId,
-              stage: currentStage.id,
+              stage: currentStage.id
             });
           }
         }
