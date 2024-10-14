@@ -79,7 +79,7 @@ client.on("message", async (msg) => {
         }
       } else if (!notedContact) {
         const contact = await (await chat.getContact()).getFormattedNumber();
-        const stage = await prismaClient.stages.findUnique({
+        const stage = await prismaClient.stage.findUnique({
           where: { name: paymentOwner.stage },
         });
 

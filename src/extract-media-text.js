@@ -78,7 +78,7 @@ if (parentPort) {
 
           if (payer) {
             let remainderToPaid = {};
-            const stage = await client.stages.findUnique({
+            const stage = await client.stage.findUnique({
               where: {
                 id: payer.stageId
               }
@@ -121,7 +121,7 @@ if (parentPort) {
                     const monthsPaidByCredits =
                       notedCredits / stage.billingAmount;
 
-                    const billings = await client.billings.findMany({
+                    const billings = await client.billing.findMany({
                       where: { stage: stage }
                     });
 
@@ -145,7 +145,7 @@ if (parentPort) {
                       paidByCredits.push(getNxtBilling.id);
                     }
 
-                    await client.payments.updateMany({
+                    await client.payment.updateMany({
                       where: {
                         payer_id: payer.id,
                         billingId: { in: { paidByCredits } }
@@ -158,7 +158,7 @@ if (parentPort) {
                   }
 
                   const adjustedPayment = amount - lastPayment.credits;
-                  const unusedCredits = amount - adjustedPayment;
+                  const unusedCredits = amount - adjustedPayment;s
 
                   const totalCredits =
                     adjustedPayment < amount
@@ -184,7 +184,7 @@ if (parentPort) {
                 }
               );
 
-              const billing = await client.billings.findUnique({
+              const billing = await client.billing.findUnique({
                 where: {
                   period
                 }
@@ -193,7 +193,7 @@ if (parentPort) {
               let billingId = "";
               if (!billing) {
                 const id = nanoid();
-                await client.billings.create({
+                await client.billing.create({
                   data: {
                     id,
                     period,
@@ -204,7 +204,7 @@ if (parentPort) {
                 billingId = !billing ? id : billing.id;
               }
 
-              await client.payments.create({
+              await client.payment.create({
                 data: {
                   id: currentPaymentId,
                   amount,
@@ -220,7 +220,7 @@ if (parentPort) {
             // Create Payer on database
           }
 
-          const currentStage = await client.stages.findUnique({
+          const currentStage = await client.stage.findUnique({
             where: { name: data.contact.stage }
           });
 
