@@ -43,7 +43,9 @@ client.on("message", async (msg) => {
     if (!getContactName) {
       paymentOwner.name = name;
       paymentOwner.stage = stage;
-      paymentOwner.numberPhone = await (await chat.getContact()).getFormattedNumber()
+      paymentOwner.numberPhone = await (
+        await chat.getContact()
+      ).getFormattedNumber();
     }
   }
 
@@ -61,22 +63,19 @@ client.on("message", async (msg) => {
       if (notedContact) {
         const media = await msg.downloadMedia();
 
-        if (media.mimetype === "image/jpeg") {
-          const bufferfy = Buffer.from(media.data, "base64");
+        if (media.mimetype === "image/jpeg" || media.mimetype === "image/png") {
           const ocrWorkerPath = path.resolve("./extract-media-text.js");
-
           const ocrWorker = new Worker(ocrWorkerPath);
-          writeStream.on("finish", () => {
-            ocrWorker.postMessage(
-              JSON.stringify({
-                chatId: chat.id,
-                contact: paymentOwner,
-                img: bufferfy,
-              })
-            );
-          });
 
-          writeStream.write(bufferfy);
+          ocrWorker.postMessage(
+            JSON.stringify({
+              chatId: chat.id,
+              contact: paymentOwner,
+              img: media.data,
+              mimetype: media.mimetype,
+            })
+          );
+        } else if (media.mimetype === "application/pdf") {
         }
       } else if (!notedContact) {
         const contact = await (await chat.getContact()).getFormattedNumber();
