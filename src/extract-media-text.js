@@ -4,6 +4,8 @@ const { formatDate, nxtMonth, months } = require("./helpers/format-date");
 const { client } = require("./shared/prisma/index.prisma");
 const { nanoid } = require("nanoid");
 const { createWorker } = require("tesseract.js");
+const fs = require("node:fs");
+const path = require("node:path");
 
 const destineRegex = /Associacao Lifeshape do Brasil/;
 const amountRegex = /R\$ ?([\d\.]+,\d{2})/;
@@ -19,6 +21,26 @@ async function recognize(imageUrl) {
   const worker = await createWorker("ptbr");
   const reply = await worker.recognize(imageUrl);
   return reply.data.text;
+}
+
+async function saveMediaLocally(base64, mimetype) {
+  const filename = nanoid();
+  const base64Data = data.img.replace(/^data:image\/\w+;base64,/, "");
+  const localMediaDir = path.resolve(__dirname, "..", "tmp/audit");
+
+  const filepath = `${localMediaDir}/${filename}.${mimetype}`;
+
+  let success = false;
+  fs.writeFile(filepath, base64Data, (err) => {
+    if (err) throw err;
+    success = true;
+  });
+
+  if (success) {
+    return filepath;
+  }
+
+  return undefined;
 }
 
 function extractDate(text) {
@@ -38,7 +60,12 @@ if (parentPort) {
 
     if (data) {
       // Realizar upload para bucket (S3)
-      recognize(data.img).then(async (result) => {
+      const localMedia = await saveMediaLocally(data.img, data.mimetype);
+      if (!localMedia) {
+        throw new Error("Cannot save media locally!");
+      }
+
+      recognize(localMedia).then(async (result) => {
         const destine = result.match(destineRegex)[1];
         const amount = result.match(amountRegex)[1];
         const period = extractDate(result);
@@ -65,16 +92,66 @@ if (parentPort) {
                 if (stage.billingAmount > amount) {
                   paymentStatus = "PARTIAL";
 
-                  const partialPayment = amount - stage.billingAmount;
+                  const partialPayment = stage.billingAmount - amount;
                   remainderToPaid = {
                     period,
                     credits: partialPayment + lastPayment.credits,
                     status: paymentStatus,
                   };
+                } else if (stage.billingAmount === amount) {
+                  paymentStatus = "PAID";
+                  remainderToPaid = {
+                    period,
+                    credits: 0,
+                    status: paymentStatus,
+                  };
                 }
 
-                if (lastPayment.credits > 0 && stage.billingAmount <= amount) {
+                if (stage.billingAmount <= amount) {
                   paymentStatus = "PAID";
+                  const credits = amount - stage.billingAmount;
+                  const notedCredits = lastPayment.credits + credits;
+
+                  if (notedCredits === stage.billingAmount) {
+                    // Next billing has been paid;
+                    const monthsPaidByCredits =
+                      notedCredits / stage.billingAmount;
+
+                    const billings = await client.billings.findMany({
+                      where: { stage: stage },
+                    });
+
+                    const periodBilling = billings.find(
+                      (billing) => billing.period === nxtPeriod
+                    );
+
+                    if (!periodBilling) {
+                      throw new Error("Period Billing not found!");
+                    }
+
+                    const paidByCredits = [];
+                    for (let index = 0; index < monthsPaidByCredits; index++) {
+                      const { id } = periodBilling;
+                      const nxtBillingIndex = id + index;
+                      const getNxtBilling = billings[nxtBillingIndex];
+
+                      if (!getNxtBilling) {
+                      }
+
+                      paidByCredits.push(getNxtBilling.id);
+                    }
+
+                    await client.payments.updateMany({
+                      where: {
+                        payer_id: payer.id,
+                        billingId: { in: { paidByCredits } },
+                      },
+                      data: {
+                        status: "PAID",
+                        credits: 0,
+                      },
+                    });
+                  }
 
                   const adjustedPayment = amount - lastPayment.credits;
                   const unusedCredits = amount - adjustedPayment;
@@ -135,6 +212,8 @@ if (parentPort) {
                 },
               });
             }
+          } else {
+            // Create Payer on database
           }
 
           const currentStage = await client.stages.findUnique({
