@@ -13,6 +13,14 @@ const { formatDate } = require("../../helpers/format-date");
 
   const period = formatDate(new Date());
   if (period) {
+    const [month, year] = period.split("/");
+    if (month === "set") {
+      // Update all Lifeshapers stage in course;
+      // Remember, the last class (Shapers) get out in application (Remove all in database);
+      // Send message to require unpaid billings.
+      growStage();
+    }
+
     for (let stage of stages) {
       const stageAlreadyNoted = await client.stage.findUnique({
         where: {
