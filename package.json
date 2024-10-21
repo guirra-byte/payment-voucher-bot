@@ -21,6 +21,7 @@
     "nanoid": "^3.3.6",
     "node-cron": "^3.0.3",
     "qrcode-terminal": "^0.12.0",
+    "sdk-node-apis-efi": "^1.2.8",
     "tesseract.js": "^5.1.1",
     "whatsapp-web.js": "^1.25.0"
   },
